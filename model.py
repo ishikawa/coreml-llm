@@ -4,7 +4,9 @@ import numpy as np
 import torch
 from transformers.models.llama.modeling_llama import LlamaForCausalLM
 
-model_id = "meta-llama/Llama-3.1-8B-Instruct"
+# NOTE: Too large to be converted to CoreML on MacBook Pro 16GB RAM
+# model_id = "meta-llama/Llama-3.1-8B-Instruct"
+model_id = "meta-llama/Llama-3.2-1B-Instruct"
 
 batch_size = 1
 context_size = 2048
