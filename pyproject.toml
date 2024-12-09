@@ -1,6 +1,7 @@
 [tool.poetry]
 name = "coreml-llm"
 version = "0.1.0"
+package-mode = false
 description = ""
 authors = ["Takanori Ishikawa <takanori.ishikawa@gmail.com>"]
 license = "MIT"
