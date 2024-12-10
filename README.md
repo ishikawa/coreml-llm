@@ -9,4 +9,5 @@ optimize LLMs for iPhone.
 
 ```sh
 $ poetry run python ./llama/export-model.py
+$ poetry run python ./llama/predict.py
 ```
