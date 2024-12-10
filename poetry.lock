@@ -275,6 +275,23 @@ sympy = "*"
 tqdm = "*"
 
 [[package]]
+name = "exporters"
+version = "0.0.1"
+description = "Core ML exporter for Hugging Face Transformers"
+optional = false
+python-versions = ">=3.8.0"
+files = []
+develop = false
+
+[package.dependencies]
+coremltools = ">=7"
+transformers = ">=4.30.0"
+
+[package.source]
+type = "directory"
+url = "../exporters"
+
+[[package]]
 name = "filelock"
 version = "3.16.1"
 description = "A platform independent file lock."
@@ -1618,4 +1635,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "01e64609d94544a4fd510aad3be471028b09f4d9ea2bd3373e6057e2cd6de691"
+content-hash = "4da88c32fd87e388a261de2130cbdc96a8e333f068553bbcd8dfe5a1344fc2b1"
