@@ -56,3 +56,14 @@ mlmodel: ct.models.MLModel = ct.convert(
     minimum_deployment_target=ct.target.macOS13,
     skip_model_load=True,
 )
+
+# set metadata
+mlmodel.author = "meta-llama"
+mlmodel.license = "See https://www.llama.com/llama3/license/"
+mlmodel.short_description = "Llama-3.2-1B-Instruct"
+mlmodel.input_description["inputIds"] = "Input token IDs."
+mlmodel.input_description["attentionMask"] = "Attention mask."
+mlmodel.output_description["logits"] = "Logits for next token prediction."
+mlmodel.version = "3.2"
+
+mlmodel.save("models/Llama-3.2-1B-Instruct.mlpackage")
