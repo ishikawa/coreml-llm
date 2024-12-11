@@ -34,8 +34,8 @@ torch_model = BaselineGPT2LMHeadModel.from_pretrained(model_id).eval()
 
 # trace the PyTorch model
 example_inputs: tuple[torch.Tensor, torch.Tensor] = (
-    torch.zeros(input_shape, dtype=torch.int32),
-    torch.zeros(input_shape, dtype=torch.int32),
+    torch.zeros(input_shape, dtype=torch.long),
+    torch.zeros(input_shape, dtype=torch.long),
 )
 traced_model: torch.jit.ScriptModule = torch.jit.trace(
     torch_model,
@@ -47,8 +47,8 @@ traced_model: torch.jit.ScriptModule = torch.jit.trace(
 # attention_mask torch.Size([1, 11])
 # convert to Core ML format
 inputs: list[ct.TensorType] = [
-    ct.TensorType(shape=input_shape, dtype=np.int32, name="inputIds"),
-    ct.TensorType(shape=input_shape, dtype=np.int32, name="attentionMask"),
+    ct.TensorType(shape=input_shape, dtype=np.long, name="inputIds"),
+    ct.TensorType(shape=input_shape, dtype=np.long, name="attentionMask"),
 ]
 
 outputs: list[ct.TensorType] = [ct.TensorType(dtype=np.float16, name="logits")]
