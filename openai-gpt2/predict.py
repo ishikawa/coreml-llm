@@ -14,6 +14,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
 @click.command()
 @click.argument("prompt", default="What is generative AI?", required=False)
 def main(prompt):
+    """
+    Generate text using GPT-2 model."""
     # prompt
     inputs = tokenizer(prompt, return_tensors="pt", max_length=2048, truncation=True)
 
