@@ -8,7 +8,9 @@ context_size = 128
 model_id = "gpt2"
 
 loaded_model = ct.models.MLModel("models/gpt2.mlpackage")
-tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
+tokenizer = AutoTokenizer.from_pretrained(
+    model_id, use_fast=True, clean_up_tokenization_spaces=False
+)
 
 
 @click.command()
