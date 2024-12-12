@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:SwiftCoreMLRunner}",
+      "name": "Debug SwiftCoreMLRunner",
+      "program": "${workspaceFolder:SwiftCoreMLRunner}/.build/debug/SwiftCoreMLRunner",
+      "preLaunchTask": "swift: Build Debug SwiftCoreMLRunner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:SwiftCoreMLRunner}",
+      "name": "Release SwiftCoreMLRunner",
+      "program": "${workspaceFolder:SwiftCoreMLRunner}/.build/release/SwiftCoreMLRunner",
+      "preLaunchTask": "swift: Build Release SwiftCoreMLRunner"
+    }
+  ]
+}
