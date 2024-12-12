@@ -34,7 +34,7 @@ def main(prompt, max_length, model_name):
         model.generate(
             **encoded_inputs,
             max_new_tokens=1,  # Generate only the first token
-            do_sample=True,
+            do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
         )
     first_token_time = time.time() - start_time
