@@ -60,4 +60,4 @@ mlmodel: ct.models.MLModel = ct.convert(
     skip_model_load=True,
 )
 
-mlmodel.save("models/gpt2.mlpackage")
+mlmodel.save("models/GPT2Model.mlpackage")
