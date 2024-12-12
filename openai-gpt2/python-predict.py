@@ -39,12 +39,12 @@ def main(prompt, max_length, model_name):
         )
     first_token_time = time.time() - start_time
 
-    # Generate remaining tokens
+    # Generate full text
     start_time = time.time()
     with torch.no_grad():
         outputs = model.generate(
             **encoded_inputs,
-            max_length=max_length,  # Generate the remaining tokens
+            max_length=max_length,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id,
         )
