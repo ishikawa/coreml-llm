@@ -9,7 +9,7 @@ batch_size = 1
 context_size = 128
 model_id = "gpt2"
 
-loaded_model = ct.models.MLModel("models/gpt2.mlpackage")
+loaded_model = ct.models.MLModel("models/GPT2Model.mlpackage")
 tokenizer = AutoTokenizer.from_pretrained(
     model_id, use_fast=True, clean_up_tokenization_spaces=False
 )

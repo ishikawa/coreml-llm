@@ -60,4 +60,14 @@ mlmodel: ct.models.MLModel = ct.convert(
     skip_model_load=True,
 )
 
+# set metadata
+mlmodel.input_description["inputIds"] = "Input token IDs."
+mlmodel.input_description["attentionMask"] = "Attention mask."
+mlmodel.output_description["logits"] = "Logits for next token prediction."
+
+mlmodel.author = "OpenAI"
+mlmodel.license = "MIT"
+mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
+mlmodel.version = "2.0"
+
 mlmodel.save("models/GPT2Model.mlpackage")
