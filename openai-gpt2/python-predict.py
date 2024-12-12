@@ -7,8 +7,8 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 @click.command()
 @click.argument("prompt", type=str)
-@click.option("--max_length", default=128, help="Maximum length of generated text.")
-@click.option("--model_name", default="gpt2", help="Model name or path for GPT-2.")
+@click.option("--max-length", default=128, help="Maximum length of generated text.")
+@click.option("--model-name", default="gpt2", help="Model name or path for GPT-2.")
 def main(prompt, max_length, model_name):
     # Load model and tokenizer
     print("Loading model and tokenizer...")
@@ -50,7 +50,10 @@ def main(prompt, max_length, model_name):
         )
 
     # Decode the output
-    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    generated_text = tokenizer.decode(
+        outputs[0],
+        skip_special_tokens=True,
+    )
 
     # Measure throughput (TPS)
     total_tokens = len(outputs[0]) - len(

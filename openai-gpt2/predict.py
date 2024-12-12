@@ -1,3 +1,5 @@
+import time
+
 import click
 import coremltools as ct
 import torch
@@ -14,8 +16,9 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 
 @click.command()
-@click.argument("prompt", default="What is generative AI?", required=False)
-def main(prompt):
+@click.argument("prompt", type=str)
+@click.option("--max-length", default=128, help="Maximum length of generated text.")
+def main(prompt, max_length):
     """
     Generate text using GPT-2 model."""
     # prompt
@@ -31,10 +34,11 @@ def main(prompt):
         return padded_tensor
 
     # 生成ループの設定
-    max_generated_tokens = 50  # 最大生成トークン数
     generated_tokens = []  # 生成されたトークンを格納
+    start_time = time.time()
+    ttft = None
 
-    for i in range(max_generated_tokens):
+    for i in range(max_length):
         # print(i, input_ids)
 
         # 現在の input_ids と attention_mask をコンテキストサイズにパディング
@@ -60,6 +64,10 @@ def main(prompt):
         # 生成されたトークンを記録
         generated_tokens.append(next_token_id.item())
 
+        # 最初のトークンが生成された時間を記録
+        if len(generated_tokens) == 1:
+            ttft = (time.time() - start_time) * 1000  # ミリ秒に変換
+
         # input_idsとattention_maskを更新
         input_ids = torch.cat([input_ids, next_token_id.unsqueeze(0)], dim=1)
         attention_mask = torch.cat(
@@ -71,10 +79,18 @@ def main(prompt):
             input_ids = input_ids[:, -context_size:]
             attention_mask = attention_mask[:, -context_size:]
 
+    end_time = time.time()
+    total_time = end_time - start_time
+    tokens_per_second = len(generated_tokens) / total_time
+
     # 生成されたトークンをデコードしてテキストに変換
     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
     print("Generated Text:", generated_text)
+
+    print("\nPerformance Metrics:")
+    print(f"Time to First Token (TTFT): {ttft:.2f} ms")
+    print(f"Tokens Per Second (TPS): {tokens_per_second:.2f}")
 
 
 if __name__ == "__main__":
