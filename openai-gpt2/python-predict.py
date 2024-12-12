@@ -45,7 +45,7 @@ def main(prompt, max_length, model_name):
         outputs = model.generate(
             **encoded_inputs,
             max_length=max_length,
-            do_sample=True,
+            do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
         )
 
