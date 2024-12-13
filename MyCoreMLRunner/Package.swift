@@ -6,16 +6,21 @@ import PackageDescription
 let package = Package(
     name: "MyCoreMLRunner",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "my-core-ml-runner", targets: ["MyCoreMLRunner", "MyCoreMLModels"]),
         .library(name: "MyCoreMLModels", targets: ["MyCoreMLModels"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/huggingface/swift-transformers", from: "0.1.5")
+    ],
     targets: [
         .target(
             name: "MyCoreMLModels",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Transformers", package: "swift-transformers")
+            ],
             path: "Sources",
             // NOTE: .process() を使うとリソースの名前が変わるのか、bundle から取得できない
             resources: [.copy("./GPT2Model.mlmodelc")]),
