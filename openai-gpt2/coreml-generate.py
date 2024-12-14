@@ -17,7 +17,7 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 @click.command()
 @click.argument("prompt", type=str)
-@click.option("--max-length", default=2048, help="Maximum length of generated text.")
+@click.option("--max-length", default=100, help="Maximum length of generated text.")
 def main(prompt, max_length):
     """
     Generate text using GPT-2 model."""
