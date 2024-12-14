@@ -14,7 +14,9 @@ let package = Package(
         .library(name: "MyCoreMLModels", targets: ["MyCoreMLModels"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/huggingface/swift-transformers", from: "0.1.5")
+        .package(
+            url: "https://github.com/huggingface/swift-transformers",
+            branch: "preview")
     ],
     targets: [
         .target(
