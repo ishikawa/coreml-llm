@@ -9,6 +9,8 @@ class Generator: Generation {
 
     private let maxContextLength: Int
 
+    public var streamer: BaseStreamer?
+
     init(model: MLModel, maxContextLength: Int) {
         self.model = model
         self.maxContextLength = maxContextLength
@@ -54,16 +56,16 @@ class Generator: Generation {
     }
 
     @discardableResult
-    func generate(
-        config: GenerationConfig,
-        tokens: InputTokens,
-        callback: PredictionTokensCallback?
-    ) async -> GenerationOutput {
-        return await generate(
+    func generate(config: GenerationConfig, tokens: InputTokens) async -> GenerationOutput {
+        let output = await generate(
             config: config,
             tokens: tokens,
-            model: predictNextTokenScores,
-            callback: callback)
+            model: predictNextTokenScores
+        ) { tokens in
+            self.streamer?.put(tokens)
+        }
+
+        streamer?.end()
+        return output
     }
 }
-

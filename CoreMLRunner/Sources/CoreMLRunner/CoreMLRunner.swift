@@ -20,19 +20,14 @@ public struct CoreMLRunner {
         generationConfig.eosTokenId = tokenizer.eosTokenId
         generationConfig.bosTokenId = tokenizer.bosTokenId
 
+        let streamer = TextStreamer(tokenizer: tokenizer)
         let generator = Generator(model: model, maxContextLength: maxContextLength)
+        generator.streamer = streamer
 
-        let output = await generator.generate(
+        _ = await generator.generate(
             config: generationConfig,
             tokens: inputIds
-        ) { tokens in
-            let text = tokenizer.decode(tokens: tokens)
-
-            print("Callback: \(text)")
-        }
-
-        let text = tokenizer.decode(tokens: output)
-        print("\nOutput: \(text)")
+        )
     }
 
     static func load_model() throws -> MLModel {
