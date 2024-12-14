@@ -14,30 +14,18 @@ protocol BaseStreamer {
 
 class TextStreamer: BaseStreamer {
     private let tokenizer: Tokenizer
-    private let skipPrompt: Bool
 
     // Variables used in streaming process
     private var tokenCache: [Int] = []
     private var printLen: Int = 0
 
-    var nextTokensArePrompt: Bool = true
-
     private(set) public var numTokensGenerated: Int = 0
 
-    init(tokenizer: Tokenizer, skipPrompt: Bool = false) {
+    init(tokenizer: Tokenizer) {
         self.tokenizer = tokenizer
-        self.skipPrompt = skipPrompt
     }
 
     func put(_ value: GenerationOutput) {
-        defer {
-            nextTokensArePrompt = false
-        }
-
-        if skipPrompt && nextTokensArePrompt {
-            return
-        }
-
         // Add new tokens to cache and decode
         let numNewTokens = value.count - numTokensGenerated
 
@@ -79,7 +67,6 @@ class TextStreamer: BaseStreamer {
             printLen = 0
         }
 
-        nextTokensArePrompt = true
         onFinalizedText(printableText, streamEnd: true)
     }
 
@@ -101,13 +88,14 @@ final class PerformanceMetricsStreamer: TextStreamer {
     private(set) public var endTime: Date?
     private(set) public var firstTokenTime: TimeInterval?
 
-    override init(tokenizer: Tokenizer, skipPrompt: Bool = false) {
+    override init(tokenizer: Tokenizer) {
         self.startTime = Date()
-        super.init(tokenizer: tokenizer, skipPrompt: skipPrompt)
+        super.init(tokenizer: tokenizer)
     }
 
     override func put(_ value: GenerationOutput) {
-        if !nextTokensArePrompt && firstTokenTime == nil {
+        // swift-transformers の実装では、最初のトークン生成後に put が呼ばれる
+        if firstTokenTime == nil {
             firstTokenTime = Date().timeIntervalSince(startTime)
         }
 
