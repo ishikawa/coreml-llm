@@ -53,6 +53,24 @@
       "name": "Release my-core-ml-runner",
       "program": "${workspaceFolder:MyCoreMLRunner}/.build/release/my-core-ml-runner",
       "preLaunchTask": "swift: Build Release my-core-ml-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Debug gpt2-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/debug/gpt2-runner",
+      "preLaunchTask": "swift: Build Debug gpt2-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Release gpt2-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/release/gpt2-runner",
+      "preLaunchTask": "swift: Build Release gpt2-runner"
     }
   ]
 }

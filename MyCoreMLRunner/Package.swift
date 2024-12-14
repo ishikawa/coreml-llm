@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "MyCoreMLRunner",
+    name: "GPT2Model",
     platforms: [
         .macOS(.v15),
         .iOS(.v18),
     ],
     products: [
-        .executable(name: "my-core-ml-runner", targets: ["MyCoreMLRunner", "MyCoreMLModels"]),
-        .library(name: "MyCoreMLModels", targets: ["MyCoreMLModels"]),
+        .executable(name: "gpt2-runner", targets: ["GPT2ModelCLI", "GPT2Model"]),
+        .library(name: "GPT2Model", targets: ["GPT2Model"]),
     ],
     dependencies: [
         .package(
@@ -20,16 +20,14 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "MyCoreMLModels",
+            name: "GPT2Model",
             dependencies: [
                 .product(name: "Transformers", package: "swift-transformers")
             ],
-            path: "Sources",
             // NOTE: .process() を使うとリソースの名前が変わるのか、bundle から取得できない
             resources: [.copy("./GPT2Model.mlmodelc")]),
         .executableTarget(
-            name: "MyCoreMLRunner",
-            dependencies: ["MyCoreMLModels"],
-            path: "cmd"),
+            name: "GPT2ModelCLI",
+            dependencies: ["GPT2Model"]),
     ]
 )

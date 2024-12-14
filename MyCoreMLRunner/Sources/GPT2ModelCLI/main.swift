@@ -1,6 +1,6 @@
 import CoreML
 import Foundation
-import MyCoreMLModels
+import GPT2Model
 
 guard CommandLine.arguments.count > 1 else {
     print("Usage: command <input text>")
@@ -8,6 +8,7 @@ guard CommandLine.arguments.count > 1 else {
 }
 
 let prompt = CommandLine.arguments[1]
-let output = try! await llm_predict(prompt: prompt)
+let lm = try! GPT2TextGenerationModel.load_model()
+let output = try! await lm.generate(config: lm.defaultGenerationConfig, prompt: prompt)
 
 print("Output: \(output)")
