@@ -5,7 +5,8 @@ import Generation
 import Models
 import Tokenizers
 
-let maxContextLength = 1024
+// 簡潔さのために固定値にする。本来は、CoreML model のメタデータから取得する
+let MAX_CONTEXT_LENGTH = 1024
 
 class Generator: Generation {
     private let model: MLModel
@@ -83,24 +84,26 @@ func main(prompt: String, maxLength: Int) async throws {
     let tokenizer = try await AutoTokenizer.from(pretrained: "gpt2")
     let inputIds = tokenizer.encode(text: prompt)
 
-    let lm = try! GPT2TextGenerationModel.load_model()
-
-    var generationConfig = lm.defaultGenerationConfig
-    generationConfig.maxNewTokens = maxLength - inputIds.count
+    var generationConfig = GenerationConfig(
+        maxLength: maxLength,
+        maxNewTokens: maxLength - inputIds.count,
+        doSample: true)
     generationConfig.eosTokenId = tokenizer.eosTokenId
     generationConfig.bosTokenId = tokenizer.bosTokenId
 
-    let generator = Generator(model: model, maxContextLength: maxContextLength)
+    let generator = Generator(model: model, maxContextLength: MAX_CONTEXT_LENGTH)
 
-    _ = await generator.generate(
+    let output = await generator.generate(
         config: generationConfig,
         tokens: inputIds
     ) { tokens in
         let text = tokenizer.decode(tokens: tokens)
 
-        // 改行なし、flush することでリアルタイムに出力できる
-        print(text, terminator: "")
+        print("Callback: \(text)")
     }
+
+    let text = tokenizer.decode(tokens: output)
+    print("\nOutput: \(text)")
 }
 
 guard CommandLine.arguments.count > 1 else {
