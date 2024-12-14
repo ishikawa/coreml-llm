@@ -74,7 +74,7 @@ def main(prompt, max_length):
         pad_token_id=tokenizer.eos_token_id,
     )
 
-    # Example:
+    # Example output:
     # [Prompt]  => 7 tokens, latency (TTFT): 5374.15 ms
     # [Extend]  => 100 tokens, throughput: 0.19 tokens/s
     print(
