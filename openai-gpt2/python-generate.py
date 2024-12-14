@@ -47,7 +47,7 @@ class PerformanceMetricsStreamer(TextStreamer):
 @click.option(
     "--max-length",
     type=int,
-    default=128,
+    default=100,
     help="The maximum number of tokens to generate.",
 )
 def main(prompt, max_length):
