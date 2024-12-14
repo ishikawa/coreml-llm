@@ -16,7 +16,8 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/huggingface/swift-transformers",
-            branch: "preview")
+            branch: "preview"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
     ],
     targets: [
         .target(
@@ -28,6 +29,9 @@ let package = Package(
             resources: [.copy("./GPT2Model.mlmodelc")]),
         .executableTarget(
             name: "GPT2ModelCLI",
-            dependencies: ["GPT2Model"]),
+            dependencies: [
+                "GPT2Model",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]),
     ]
 )
