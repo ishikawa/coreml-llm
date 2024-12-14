@@ -6,11 +6,8 @@ from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 model_id = "gpt2"
 
 batch_size = 1
-context_size = 128
+context_size = 1024
 input_shape = (batch_size, context_size)
-
-
-# print(model.__class__.__name__)
 
 
 class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
@@ -60,4 +57,14 @@ mlmodel: ct.models.MLModel = ct.convert(
     skip_model_load=True,
 )
 
-mlmodel.save("models/gpt2.mlpackage")
+# set metadata
+mlmodel.input_description["inputIds"] = "Input token IDs."
+mlmodel.input_description["attentionMask"] = "Attention mask."
+mlmodel.output_description["logits"] = "Logits for next token prediction."
+
+mlmodel.author = "OpenAI"
+mlmodel.license = "MIT"
+mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
+mlmodel.version = "2.0"
+
+mlmodel.save("models/GPT2Model.mlpackage")

@@ -1,0 +1,76 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:SwiftCoreMLRunner}",
+      "name": "Debug SwiftCoreMLRunner",
+      "program": "${workspaceFolder:SwiftCoreMLRunner}/.build/debug/SwiftCoreMLRunner",
+      "preLaunchTask": "swift: Build Debug SwiftCoreMLRunner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:SwiftCoreMLRunner}",
+      "name": "Release SwiftCoreMLRunner",
+      "program": "${workspaceFolder:SwiftCoreMLRunner}/.build/release/SwiftCoreMLRunner",
+      "preLaunchTask": "swift: Build Release SwiftCoreMLRunner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:coreml-llm}/MyCoreMLRunner",
+      "name": "Debug my-core-ml-runner (MyCoreMLRunner)",
+      "program": "${workspaceFolder:coreml-llm}/MyCoreMLRunner/.build/debug/my-core-ml-runner",
+      "preLaunchTask": "swift: Build Debug my-core-ml-runner (MyCoreMLRunner)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:coreml-llm}/MyCoreMLRunner",
+      "name": "Release my-core-ml-runner (MyCoreMLRunner)",
+      "program": "${workspaceFolder:coreml-llm}/MyCoreMLRunner/.build/release/my-core-ml-runner",
+      "preLaunchTask": "swift: Build Release my-core-ml-runner (MyCoreMLRunner)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Debug my-core-ml-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/debug/my-core-ml-runner",
+      "preLaunchTask": "swift: Build Debug my-core-ml-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Release my-core-ml-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/release/my-core-ml-runner",
+      "preLaunchTask": "swift: Build Release my-core-ml-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Debug gpt2-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/debug/gpt2-runner",
+      "preLaunchTask": "swift: Build Debug gpt2-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:MyCoreMLRunner}",
+      "name": "Release gpt2-runner",
+      "program": "${workspaceFolder:MyCoreMLRunner}/.build/release/gpt2-runner",
+      "preLaunchTask": "swift: Build Release gpt2-runner"
+    }
+  ]
+}

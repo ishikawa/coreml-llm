@@ -6,10 +6,10 @@ import torch
 from transformers import AutoTokenizer
 
 batch_size = 1
-context_size = 128
+context_size = 1024
 model_id = "gpt2"
 
-loaded_model = ct.models.MLModel("models/gpt2.mlpackage")
+loaded_model = ct.models.MLModel("models/GPT2Model.mlpackage")
 tokenizer = AutoTokenizer.from_pretrained(
     model_id, use_fast=True, clean_up_tokenization_spaces=False
 )
@@ -17,7 +17,7 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 @click.command()
 @click.argument("prompt", type=str)
-@click.option("--max-length", default=128, help="Maximum length of generated text.")
+@click.option("--max-length", default=2048, help="Maximum length of generated text.")
 def main(prompt, max_length):
     """
     Generate text using GPT-2 model."""
