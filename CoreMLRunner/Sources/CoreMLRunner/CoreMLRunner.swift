@@ -20,13 +20,23 @@ public struct CoreMLRunner {
         generationConfig.eosTokenId = tokenizer.eosTokenId
         generationConfig.bosTokenId = tokenizer.bosTokenId
 
-        let streamer = TextStreamer(tokenizer: tokenizer)
+        let streamer = PerformanceMetricsStreamer(tokenizer: tokenizer)
         let generator = Generator(model: model, maxContextLength: maxContextLength)
         generator.streamer = streamer
 
         _ = await generator.generate(
             config: generationConfig,
             tokens: inputIds
+        )
+
+        // Example output:
+        // [Prompt]  => 7 tokens, latency (TTFT): 5374.15 ms
+        // [Extend]  => 100 tokens, throughput: 0.19 tokens/s
+        print(
+            "[Prompt]  => \(inputIds.count) tokens, latency (TTFT): \(String(format: "%.2f", streamer.firstTokenTime!)) ms"
+        )
+        print(
+            "[Extend]  => \(streamer.numTokensGenerated) tokens, throughput: \(String(format: "%.2f", Double(streamer.numTokensGenerated) / (streamer.endTime!.timeIntervalSince(streamer.startTime)))) tokens/s"
         )
     }
 

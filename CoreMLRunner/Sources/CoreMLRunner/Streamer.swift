@@ -12,16 +12,17 @@ protocol BaseStreamer {
     func end()
 }
 
-final class TextStreamer: BaseStreamer {
+class TextStreamer: BaseStreamer {
     private let tokenizer: Tokenizer
     private let skipPrompt: Bool
 
     // Variables used in streaming process
     private var tokenCache: [Int] = []
     private var printLen: Int = 0
-    private var nextTokensArePrompt: Bool = true
 
-    private var numTokensGenerated: Int = 0
+    var nextTokensArePrompt: Bool = true
+
+    private(set) public var numTokensGenerated: Int = 0
 
     init(tokenizer: Tokenizer, skipPrompt: Bool = false) {
         self.tokenizer = tokenizer
@@ -92,5 +93,29 @@ final class TextStreamer: BaseStreamer {
             || (cp >= 0x20000 && cp <= 0x2A6DF) || (cp >= 0x2A700 && cp <= 0x2B73F)
             || (cp >= 0x2B740 && cp <= 0x2B81F) || (cp >= 0x2B820 && cp <= 0x2CEAF)
             || (cp >= 0xF900 && cp <= 0xFAFF) || (cp >= 0x2F800 && cp <= 0x2FA1F)
+    }
+}
+
+final class PerformanceMetricsStreamer: TextStreamer {
+    public let startTime: Date
+    private(set) public var endTime: Date?
+    private(set) public var firstTokenTime: TimeInterval?
+
+    override init(tokenizer: Tokenizer, skipPrompt: Bool = false) {
+        self.startTime = Date()
+        super.init(tokenizer: tokenizer, skipPrompt: skipPrompt)
+    }
+
+    override func put(_ value: GenerationOutput) {
+        if !nextTokensArePrompt && firstTokenTime == nil {
+            firstTokenTime = Date().timeIntervalSince(startTime)
+        }
+
+        super.put(value)
+    }
+
+    override func end() {
+        super.end()
+        endTime = Date()
     }
 }
