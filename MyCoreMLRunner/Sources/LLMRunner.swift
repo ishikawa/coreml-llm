@@ -32,8 +32,8 @@ public class GPT2TextGenerationModel: TextGenerationModel {
         (minContextLength, maxContextLength) = Self.getInputDescription(
             from: model, inputKey: "inputIds")
         self.defaultGenerationConfig = GenerationConfig(
-            maxLength: 128,
-            maxNewTokens: 30,
+            maxLength: maxContextLength,
+            maxNewTokens: 128,
             doSample: true,
             topK: 50)
         self.defaultGenerationConfig.bosTokenId = 50256

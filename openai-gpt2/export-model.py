@@ -6,11 +6,8 @@ from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 model_id = "gpt2"
 
 batch_size = 1
-context_size = 128
+context_size = 1024
 input_shape = (batch_size, context_size)
-
-
-# print(model.__class__.__name__)
 
 
 class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
