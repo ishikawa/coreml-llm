@@ -6,17 +6,10 @@ import Tokenizers
 
 public struct CoreMLRunner {
     public static func generate(prompt: String, maxLength: Int) async throws {
-        let modelURL = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent("GPT2Model")
-            .appendingPathExtension("mlmodelc")
-        print("Loading model from \(modelURL)")
-
         // 簡潔さのために固定値にする。本来は、CoreML model のメタデータから取得する
         let maxContextLength = 1024
 
-        let configuration = MLModelConfiguration()
-        let model = try! MLModel(contentsOf: modelURL, configuration: configuration)
+        let model = try load_model()
 
         let tokenizer = try await AutoTokenizer.from(pretrained: "gpt2")
         let inputIds = tokenizer.encode(text: prompt)
@@ -42,4 +35,12 @@ public struct CoreMLRunner {
         let text = tokenizer.decode(tokens: output)
         print("\nOutput: \(text)")
     }
+
+    static func load_model() throws -> MLModel {
+        let configuration = MLModelConfiguration()
+        // NOTE: Swift Package では Bundle.module でリソースにアクセスできる
+        let modelURL = Bundle.module.url(forResource: "GPT2Model", withExtension: "mlmodelc")!
+        return try MLModel(contentsOf: modelURL, configuration: configuration)
+    }
+
 }
