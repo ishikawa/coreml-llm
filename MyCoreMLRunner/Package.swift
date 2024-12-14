@@ -17,7 +17,7 @@ let package = Package(
         .package(
             url: "https://github.com/huggingface/swift-transformers",
             branch: "preview"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
     ],
     targets: [
         .target(
@@ -32,6 +32,10 @@ let package = Package(
             dependencies: [
                 "GPT2Model",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]),
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-parse-as-library"])
+            ]
+        ),
     ]
 )
