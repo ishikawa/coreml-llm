@@ -10,6 +10,9 @@ struct CoreMLRunnerCLI: AsyncParsableCommand {
     var maxLength: Int = 100
 
     mutating func run() async throws {
-        try await CoreMLRunner.generate(prompt: prompt, maxLength: maxLength)
+        try await CoreMLRunner.generate(
+            prompt: prompt,
+            maxLength: maxLength,
+            doSample: true)
     }
 }
