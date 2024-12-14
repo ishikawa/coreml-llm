@@ -64,13 +64,23 @@ public class GPT2TextGenerationModel: TextGenerationModel {
         let input = try! MLDictionaryFeatureProvider(dictionary: inputDictionary)
 
         let output = try! model.prediction(from: input)
+        //print("output: \(output)")
 
-        // TODO: maybe try to support models with "token_scores" too (after the softmax)
-        assert(output.featureNames.first! == "logits")
+        let logits = output.featureValue(for: "logits")!
 
-        let scores = output.featureValue(for: output.featureNames.first!)!.shapedArrayValue(
-            of: Float.self)!
+        // TODO: これを無くしたい
+        // Float16 を Float に変換するための変換
+        let logitsMultiArray = logits.multiArrayValue!
+        let float16Pointer = logitsMultiArray.dataPointer.bindMemory(
+            to: UInt16.self, capacity: logitsMultiArray.count)
+        let float16Array = UnsafeBufferPointer(start: float16Pointer, count: logitsMultiArray.count)
+        let floatArray = float16Array.map { Float(Float16(bitPattern: $0)) }
+        let scores = MLShapedArray<Float>(
+            scalars: floatArray, shape: logitsMultiArray.shape.map { Int(truncating: $0) })
+
+        //let scores = output.featureValue(for: "logits")!.shapedArrayValue(of: Float16.self)!
         let nextTokenScores = scores[0, maxTokens - 1]
+        //print("nextTokenScores: \(nextTokenScores)")
 
         return nextTokenScores
     }
@@ -113,12 +123,14 @@ public class GPT2TextGenerationModel: TextGenerationModel {
     }
 }
 
-public func llm_predict() async throws -> String {
+public func llm_predict() async throws {
     let configuration = MLModelConfiguration()
     // NOTE: Swift Package では Bundle.module でリソースにアクセスできる
     let modelURL = Bundle.module.url(forResource: "GPT2Model", withExtension: "mlmodelc")!
     let model = try MLModel(contentsOf: modelURL, configuration: configuration)
     let lm = GPT2TextGenerationModel(model: model)
 
-    return try await lm.generate(config: lm.defaultGenerationConfig, prompt: "Hello, my name is")
+    let output = try await lm.generate(
+        config: lm.defaultGenerationConfig, prompt: "Hello, my name is")
+    print("Output: \(output)")
 }
