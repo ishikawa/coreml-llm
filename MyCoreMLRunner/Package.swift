@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "MyCoreMLRunner",
     platforms: [
-        .macOS(.v15)
+        .macOS(.v15),
+        .iOS(.v18),
     ],
     products: [
         .executable(name: "my-core-ml-runner", targets: ["MyCoreMLRunner", "MyCoreMLModels"]),
