@@ -19,7 +19,7 @@ def generate_streaming(prompt: str, max_length=50):
         **encoded_inputs,
         streamer=streamer,
         max_new_tokens=max_new_tokens,
-        do_sample=False,
+        do_sample=True,
         pad_token_id=tokenizer.eos_token_id,
     )
 
