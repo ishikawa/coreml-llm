@@ -71,6 +71,42 @@
       "name": "Release gpt2-runner",
       "program": "${workspaceFolder:MyCoreMLRunner}/.build/release/gpt2-runner",
       "preLaunchTask": "swift: Build Release gpt2-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:coreml-llm}/CoreMLRunner",
+      "name": "Debug coreml-runner (CoreMLRunner)",
+      "program": "${workspaceFolder:coreml-llm}/CoreMLRunner/.build/debug/coreml-runner",
+      "preLaunchTask": "swift: Build Debug coreml-runner (CoreMLRunner)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:coreml-llm}/CoreMLRunner",
+      "name": "Release coreml-runner (CoreMLRunner)",
+      "program": "${workspaceFolder:coreml-llm}/CoreMLRunner/.build/release/coreml-runner",
+      "preLaunchTask": "swift: Build Release coreml-runner (CoreMLRunner)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:CoreMLRunner}",
+      "name": "Debug coreml-runner",
+      "program": "${workspaceFolder:CoreMLRunner}/.build/debug/coreml-runner",
+      "preLaunchTask": "swift: Build Debug coreml-runner"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:CoreMLRunner}",
+      "name": "Release coreml-runner",
+      "program": "${workspaceFolder:CoreMLRunner}/.build/release/coreml-runner",
+      "preLaunchTask": "swift: Build Release coreml-runner"
     }
   ]
 }

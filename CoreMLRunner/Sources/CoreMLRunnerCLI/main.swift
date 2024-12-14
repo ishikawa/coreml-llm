@@ -1,7 +1,8 @@
 import ArgumentParser
+import CoreMLRunner
 
 @main
-struct GPT2Runner: AsyncParsableCommand {
+struct CoreMLRunnerCLI: AsyncParsableCommand {
     @Argument(help: "The input prompt for text generation")
     var prompt: String
 
@@ -9,6 +10,6 @@ struct GPT2Runner: AsyncParsableCommand {
     var maxLength: Int = 100
 
     mutating func run() async throws {
-        try await run_command(prompt: prompt, maxLength: maxLength)
+        try await CoreMLRunner.generate(prompt: prompt, maxLength: maxLength)
     }
 }
