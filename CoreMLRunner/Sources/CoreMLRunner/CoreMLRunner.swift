@@ -8,8 +8,7 @@ public struct CoreMLRunner {
     public static func generate(prompt: String, maxLength: Int, doSample: Bool = false) async throws
     {
         let model = try load_model()
-        let (_, maxContextLength) = GPT2TextGenerationModel.getInputDescription(
-            from: model, inputKey: "inputIds")
+        let (_, maxContextLength) = getInputDescription(from: model, inputKey: "inputIds")
 
         let tokenizer = try await AutoTokenizer.from(pretrained: "gpt2")
         let inputIds = tokenizer.encode(text: prompt)
