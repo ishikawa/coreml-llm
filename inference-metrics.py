@@ -9,6 +9,8 @@
 import re
 import subprocess
 import time
+from dataclasses import dataclass
+from typing import Optional
 
 import click
 
@@ -19,9 +21,17 @@ def run_command(command) -> float:
     return time.time() - start_time
 
 
-def extract_metrics(stdout: str) -> dict:
+@dataclass
+class InferenceMetrics:
+    prompt_tokens: Optional[int] = None
+    ttft_ms: Optional[float] = None
+    extend_tokens: Optional[int] = None
+    tps: Optional[float] = None
+
+
+def extract_metrics(stdout: str) -> InferenceMetrics:
     """Extract metrics from stdout"""
-    metrics = {}
+    metrics = InferenceMetrics()
 
     # Extract prompt tokens and TTFT
     prompt_match = re.search(
@@ -29,16 +39,16 @@ def extract_metrics(stdout: str) -> dict:
         stdout,
     )
     if prompt_match:
-        metrics["prompt_tokens"] = int(prompt_match.group(1))
-        metrics["ttft_ms"] = float(prompt_match.group(2))
+        metrics.prompt_tokens = int(prompt_match.group(1))
+        metrics.ttft_ms = float(prompt_match.group(2))
 
     # Extract extend tokens and TPS
     extend_match = re.search(
         r"\[Extend\]\s*=>\s*(\d+)\s*tokens,\s*throughput:\s*([\d.]+)\s*tokens/s", stdout
     )
     if extend_match:
-        metrics["extend_tokens"] = int(extend_match.group(1))
-        metrics["tps"] = float(extend_match.group(2))
+        metrics.extend_tokens = int(extend_match.group(1))
+        metrics.tps = float(extend_match.group(2))
 
     return metrics
 
@@ -65,11 +75,11 @@ def main(n: int, command):
 
             click.echo(f"Execution time: {execution_time:.3f}s")
             metrics = extract_metrics(stdout)
-            if metrics:
-                click.echo(f"Prompt tokens: {metrics.get('prompt_tokens', 'N/A')}")
-                click.echo(f"TTFT: {metrics.get('ttft_ms', 'N/A')} ms")
-                click.echo(f"Extend tokens: {metrics.get('extend_tokens', 'N/A')}")
-                click.echo(f"Tokens/s: {metrics.get('tps', 'N/A')}")
+            if any(vars(metrics).values()):  # Check if any metrics were extracted
+                click.echo(f"Prompt tokens: {metrics.prompt_tokens or 'N/A'}")
+                click.echo(f"TTFT: {metrics.ttft_ms or 'N/A'} ms")
+                click.echo(f"Extend tokens: {metrics.extend_tokens or 'N/A'}")
+                click.echo(f"Tokens/s: {metrics.tps or 'N/A'}")
             click.echo(f"stdout:\n{stdout}")
         except subprocess.CalledProcessError as e:
             raise click.ClickException(f"Command failed with exit code {e.returncode}")
