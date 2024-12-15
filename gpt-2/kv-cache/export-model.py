@@ -143,9 +143,17 @@ class KvCacheStateGPT2LMHeadModel(torch.nn.Module):
     ) -> torch.Tensor:
         # Compute past seen tokens used for updating key/value cache slices
         self.kv_cache.past_seen_tokens = causal_mask.shape[-1] - input_ids.shape[-1]
-        print("past_seen_tokens", self.kv_cache.past_seen_tokens)
+        # print("past_seen_tokens", self.kv_cache.past_seen_tokens)
+        # print("input_ids", input_ids)
+        # print("causal_mask", causal_mask)
+
+        assert causal_mask.dim() == 4, "Causal mask should have 4 dimensions."
+        assert (
+            causal_mask.max() == 0
+        ), "Custom 4D attention mask should be passed in inverted form with max==0`"
+
         return self.model(
-            input_ids,
+            input_ids=input_ids,
             attention_mask=causal_mask,
             past_key_values=self.kv_cache,
             use_cache=True,
@@ -187,12 +195,12 @@ def main(
     print("kv_cache_shape", torch_model.kv_cache_shape)
 
     example_inputs: tuple[torch.Tensor, ...] = (
-        torch.zeros((1, 1), dtype=torch.int32),
-        torch.zeros((1, 1, 1, 1), dtype=torch.float32),
+        torch.zeros((1, 2), dtype=torch.long),
+        torch.zeros((1, 1, 2, 5), dtype=torch.float32),
     )
 
     traced_model: torch.jit.ScriptModule = torch.jit.trace(
-        torch_model.eval(), example_inputs=example_inputs
+        torch_model, example_inputs=example_inputs
     )
     # print("Traced model", traced_model)
 
@@ -229,7 +237,7 @@ def main(
         outputs=outputs,
         states=states,
         minimum_deployment_target=DEPLOYMENT_TARGETS[minimum_deployment_target],
-        skip_model_load=True,
+        skip_model_load=False,
     )
 
     # set metadata
