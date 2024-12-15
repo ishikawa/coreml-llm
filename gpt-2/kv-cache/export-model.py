@@ -7,12 +7,6 @@ import torch
 from transformers import Cache
 from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 
-model_id = "gpt2"
-
-batch_size = 1
-context_size = 1024
-input_shape = (batch_size, context_size)
-
 DEPLOYMENT_TARGETS = {
     "iOS13": ct.target.iOS13,
     "iOS14": ct.target.iOS14,
@@ -117,11 +111,10 @@ class SliceUpdateKeyValueCache(Cache):
 )
 def main(context_size: int, minimum_deployment_target: str, output: str):
     """Convert GPT-2 PyTorch model to Core ML format."""
-    model_id = "gpt2"
     batch_size = 1
     input_shape = (batch_size, context_size)
 
-    torch_model = BaselineGPT2LMHeadModel.from_pretrained(model_id).eval()
+    torch_model = BaselineGPT2LMHeadModel.from_pretrained("gpt2").eval()
 
     # trace the PyTorch model
     example_inputs: tuple[torch.Tensor, torch.Tensor] = (
