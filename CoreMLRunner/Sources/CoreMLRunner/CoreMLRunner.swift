@@ -50,7 +50,7 @@ public struct CoreMLRunner {
     static func load_model() throws -> MLModel {
         let configuration = MLModelConfiguration()
         // NOTE: Swift Package では Bundle.module でリソースにアクセスできる
-        let modelURL = Bundle.module.url(forResource: "GPT2Model", withExtension: "mlmodelc")!
+        let modelURL = Bundle.module.url(forResource: "gpt2-baseline", withExtension: "mlmodelc")!
         return try MLModel(contentsOf: modelURL, configuration: configuration)
     }
 
