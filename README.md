@@ -17,7 +17,8 @@ $ poetry run python ./llama/predict.py
 ### Export model
 
 ```sh
-$ poetry run python ./openai-gpt2/export-model.py --context-size 1024 --minimum-deployment-target iOS18
+$ poetry run python ./gpt-2/baseline/export-model.py --context-size 1024 --minimum-deployment-target iOS18
+$ make build
 ```
 
 ### Inference
@@ -25,7 +26,7 @@ $ poetry run python ./openai-gpt2/export-model.py --context-size 1024 --minimum-
 Python
 
 ```sh
-poetry run python ./openai-gpt2/python-generate.py --max-length=100 "What is generative AI?"
+poetry run python ./gpt-2/baseline/python-generate.py --max-length=100 "What is generative AI?"
 Generating text:
 What is generative AI?
 

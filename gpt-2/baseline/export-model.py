@@ -4,11 +4,7 @@ import numpy as np
 import torch
 from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 
-model_id = "gpt2"
-
-batch_size = 1
-context_size = 1024
-input_shape = (batch_size, context_size)
+mlpackage_output = "models/gpt2-baseline.mlpackage"
 
 DEPLOYMENT_TARGETS = {
     "iOS13": ct.target.iOS13,
@@ -52,17 +48,16 @@ class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
 )
 @click.option(
     "--output",
-    default="models/GPT2Model.mlpackage",
+    default=mlpackage_output,
     help="Output path for the Core ML model.",
     type=click.Path(),
 )
 def main(context_size: int, minimum_deployment_target: str, output: str):
     """Convert GPT-2 PyTorch model to Core ML format."""
-    model_id = "gpt2"
     batch_size = 1
     input_shape = (batch_size, context_size)
 
-    torch_model = BaselineGPT2LMHeadModel.from_pretrained(model_id).eval()
+    torch_model = BaselineGPT2LMHeadModel.from_pretrained("gpt2").eval()
 
     # trace the PyTorch model
     example_inputs: tuple[torch.Tensor, torch.Tensor] = (

@@ -26,7 +26,7 @@ let package = Package(
                 .product(name: "Transformers", package: "swift-transformers")
             ],
             // NOTE: .process() を使うとリソースの名前が変わるのか、bundle から取得できない
-            resources: [.copy("./GPT2Model.mlmodelc")]),
+            resources: [.copy("./gpt2-baseline.mlmodelc")]),
         .executableTarget(
             name: "CoreMLRunnerCLI",
             dependencies: [
