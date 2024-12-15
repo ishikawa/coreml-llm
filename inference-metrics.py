@@ -53,6 +53,27 @@ def extract_metrics(stdout: str) -> InferenceMetrics:
     return metrics
 
 
+def calculate_average_metrics(metrics_list: list[InferenceMetrics]) -> InferenceMetrics:
+    """Calculate average metrics from a list of metrics"""
+    if not metrics_list:
+        return InferenceMetrics()
+
+    # First metrics for tokens (should be constant)
+    result = InferenceMetrics(
+        prompt_tokens=metrics_list[0].prompt_tokens,
+        extend_tokens=metrics_list[0].extend_tokens,
+    )
+
+    # Average for time-based metrics
+    ttft_values = [m.ttft_ms for m in metrics_list if m.ttft_ms is not None]
+    tps_values = [m.tps for m in metrics_list if m.tps is not None]
+
+    result.ttft_ms = sum(ttft_values) / len(ttft_values) if ttft_values else None
+    result.tps = sum(tps_values) / len(tps_values) if tps_values else None
+
+    return result
+
+
 @click.command(
     context_settings=dict(
         ignore_unknown_options=True,
@@ -64,6 +85,8 @@ def main(n: int, command):
     """Run a program multiple times and measure execution time"""
     if not command:
         raise click.UsageError("No command specified after '--'")
+
+    metrics_list = []
 
     for i in range(n):
         click.echo(f"\nRun {i + 1}/{n}")
@@ -78,16 +101,33 @@ def main(n: int, command):
 
             metrics = extract_metrics(stdout)
             if any(vars(metrics).values()):  # Check if any metrics were extracted
-                click.secho(
-                    f"Prompt tokens: {metrics.prompt_tokens or 'N/A'}", fg="blue"
-                )
-                click.secho(f"TTFT: {metrics.ttft_ms or 'N/A'} ms", fg="blue")
-                click.secho(
-                    f"Extend tokens: {metrics.extend_tokens or 'N/A'}", fg="blue"
-                )
-                click.secho(f"Tokens/s: {metrics.tps or 'N/A'}", fg="blue")
+                metrics_list.append(metrics)
+                if metrics.prompt_tokens and metrics.ttft_ms:
+                    click.secho(
+                        f"[Prompt]  => {metrics.prompt_tokens} tokens, latency (TTFT): {metrics.ttft_ms:.2f} ms",
+                        fg="blue",
+                    )
+                if metrics.extend_tokens and metrics.tps:
+                    click.secho(
+                        f"[Extend]  => {metrics.extend_tokens} tokens, throughput: {metrics.tps:.2f} tokens/s",
+                        fg="blue",
+                    )
         except subprocess.CalledProcessError as e:
             raise click.ClickException(f"Command failed with exit code {e.returncode}")
+
+    if metrics_list:
+        avg_metrics = calculate_average_metrics(metrics_list)
+        click.echo("\nAverage Metrics:")
+        if avg_metrics.prompt_tokens and avg_metrics.ttft_ms:
+            click.secho(
+                f"[Prompt]  => {avg_metrics.prompt_tokens} tokens, latency (TTFT): {avg_metrics.ttft_ms:.2f} ms",
+                fg="green",
+            )
+        if avg_metrics.extend_tokens and avg_metrics.tps:
+            click.secho(
+                f"[Extend]  => {avg_metrics.extend_tokens} tokens, throughput: {avg_metrics.tps:.2f} tokens/s",
+                fg="green",
+            )
 
 
 if __name__ == "__main__":
