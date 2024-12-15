@@ -73,14 +73,19 @@ def main(n: int, command):
             execution_time = time.time() - start_time
             stdout = r.stdout.strip()
 
-            click.echo(f"Execution time: {execution_time:.3f}s")
+            click.secho(f"stdout:\n{stdout}", fg="black")
+            click.secho(f"Execution time: {execution_time:.3f}s", fg="black")
+
             metrics = extract_metrics(stdout)
             if any(vars(metrics).values()):  # Check if any metrics were extracted
-                click.echo(f"Prompt tokens: {metrics.prompt_tokens or 'N/A'}")
-                click.echo(f"TTFT: {metrics.ttft_ms or 'N/A'} ms")
-                click.echo(f"Extend tokens: {metrics.extend_tokens or 'N/A'}")
-                click.echo(f"Tokens/s: {metrics.tps or 'N/A'}")
-            click.echo(f"stdout:\n{stdout}")
+                click.secho(
+                    f"Prompt tokens: {metrics.prompt_tokens or 'N/A'}", fg="blue"
+                )
+                click.secho(f"TTFT: {metrics.ttft_ms or 'N/A'} ms", fg="blue")
+                click.secho(
+                    f"Extend tokens: {metrics.extend_tokens or 'N/A'}", fg="blue"
+                )
+                click.secho(f"Tokens/s: {metrics.tps or 'N/A'}", fg="blue")
         except subprocess.CalledProcessError as e:
             raise click.ClickException(f"Command failed with exit code {e.returncode}")
 

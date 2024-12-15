@@ -29,3 +29,21 @@ Generative AI also has a "general purpose" approach where we ask if we could
 [Prompt]  => 6 tokens, latency (TTFT): 1.06 ms
 [Extend]  => 94 tokens, throughput: 27.67 tokens/s
 ```
+
+Swift
+
+```sh
+swift run --package-path ./CoreMLRunner -- coreml-runner --max-length=106 "What is generative AI?"
+Building for debugging...
+[1/1] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'coreml-runner' complete! (0.14s)
+What is generative AI? Read on to learn what that means, and how it could change what is happening in the future.
+[Prompt]  => 6 tokens, latency (TTFT): 0.19 ms
+[Extend]  => 20 tokens, throughput: 8.31 tokens/s
+```
+
+Measure performance metrics
+
+```sh
+poetry run python ./inference-metrics.py -n 5 -- poetry run python ./openai-gpt2/python-generate.py --max-length=106 "What is generative AI?"
+```
