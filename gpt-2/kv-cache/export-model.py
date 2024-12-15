@@ -4,7 +4,7 @@ import click
 import coremltools as ct
 import numpy as np
 import torch
-from transformers import Cache
+from transformers import Cache, GPT2Config
 from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 
 DEPLOYMENT_TARGETS = {
@@ -89,8 +89,76 @@ class SliceUpdateKeyValueCache(Cache):
         """Get the sequence length of the cache."""
         return self.past_seen_tokens
 
+    # Support for backwards-compatible `past_key_value` indexing, e.g.
+    # `past_key_value[0][0].shape[2]` to get the sequence length.
+    def __getitem__(self, layer_idx: int) -> tuple[torch.Tensor, torch.Tensor]:
+        if layer_idx < len(self):
+            # v[0].shape[2] == v[0].size(-2) == past_seen_tokens になるような v を作って返す
+            k = torch.zeros(3, 1, self.past_seen_tokens, self.past_seen_tokens)
+            v = torch.zeros(3, 1, self.past_seen_tokens, self.past_seen_tokens)
+
+            return (k, v)
+        else:
+            raise KeyError(
+                f"Cache only has {len(self)} layers, attempted to access layer with index {layer_idx}"
+            )
+
+    def __iter__(self):
+        for layer_idx in range(len(self)):
+            yield (self.k[layer_idx], self.v[layer_idx])
+
+    def __len__(self):
+        return self.k.size(0)
+
+
+class KvCacheStateGPT2LMHeadModel(torch.nn.Module):
+    """Model wrapper to swap cache implementation and register as buffers."""
+
+    kv_cache_shape: tuple[int, ...]
+    kv_cache: SliceUpdateKeyValueCache
+
+    def __init__(self, *, batch_size: int = 1, context_size: int = 1024) -> None:
+        super().__init__()
+        self.model = GPT2LMHeadModel.from_pretrained("gpt2").eval()
+        config: GPT2Config = self.model.config
+
+        self.kv_cache_shape: tuple[int, ...] = (
+            config.n_layer,  # Number of hidden layers
+            batch_size,
+            config.n_head,  # Number of attention heads
+            context_size,
+            config.n_embd // config.n_head,  # Hidden size per head
+        )
+
+        # Register KV cache buffers to be recognized as Core ML states
+        self.kv_cache = SliceUpdateKeyValueCache(shape=self.kv_cache_shape)
+        self.register_buffer("keyCache", self.kv_cache.k)
+        self.register_buffer("valueCache", self.kv_cache.v)
+
+    @torch.no_grad()
+    def forward(
+        self,
+        input_ids: torch.LongTensor,
+        causal_mask: torch.Tensor,
+    ) -> torch.Tensor:
+        # Compute past seen tokens used for updating key/value cache slices
+        self.kv_cache.past_seen_tokens = causal_mask.shape[-1] - input_ids.shape[-1]
+        print("past_seen_tokens", self.kv_cache.past_seen_tokens)
+        return self.model(
+            input_ids,
+            attention_mask=causal_mask,
+            past_key_values=self.kv_cache,
+            use_cache=True,
+        ).logits
+
 
 @click.command()
+@click.option(
+    "--batch-size",
+    default=1,
+    help="Batch size for the model.",
+    type=int,
+)
 @click.option(
     "--context-size",
     default=1024,
@@ -109,49 +177,25 @@ class SliceUpdateKeyValueCache(Cache):
     help="Output path for the Core ML model.",
     type=click.Path(),
 )
-def main(context_size: int, minimum_deployment_target: str, output: str):
+def main(
+    batch_size: int, context_size: int, minimum_deployment_target: str, output: str
+):
     """Convert GPT-2 PyTorch model to Core ML format."""
-    batch_size = 1
-    input_shape = (batch_size, context_size)
+    torch_model = KvCacheStateGPT2LMHeadModel(
+        batch_size=batch_size, context_size=context_size
+    ).eval()
+    print("kv_cache_shape", torch_model.kv_cache_shape)
 
-    torch_model = BaselineGPT2LMHeadModel.from_pretrained("gpt2").eval()
-
-    # trace the PyTorch model
-    example_inputs: tuple[torch.Tensor, torch.Tensor] = (
-        torch.zeros(input_shape, dtype=torch.long),
-        torch.zeros(input_shape, dtype=torch.long),
+    example_inputs: tuple[torch.Tensor, ...] = (
+        torch.zeros((1, 1), dtype=torch.int32),
+        torch.zeros((1, 1, 1, 1), dtype=torch.float32),
     )
+
     traced_model: torch.jit.ScriptModule = torch.jit.trace(
-        torch_model,
-        example_inputs=example_inputs,
+        torch_model.eval(), example_inputs=example_inputs
     )
 
-    # convert to Core ML format
-    inputs: list[ct.TensorType] = [
-        ct.TensorType(shape=input_shape, dtype=np.long, name="inputIds"),
-        ct.TensorType(shape=input_shape, dtype=np.long, name="attentionMask"),
-    ]
-
-    outputs: list[ct.TensorType] = [ct.TensorType(dtype=np.float16, name="logits")]
-    mlmodel: ct.models.MLModel = ct.convert(
-        traced_model,
-        inputs=inputs,
-        outputs=outputs,
-        minimum_deployment_target=DEPLOYMENT_TARGETS[minimum_deployment_target],
-        skip_model_load=True,
-    )
-
-    # set metadata
-    mlmodel.input_description["inputIds"] = "Input token IDs."
-    mlmodel.input_description["attentionMask"] = "Attention mask."
-    mlmodel.output_description["logits"] = "Logits for next token prediction."
-
-    mlmodel.author = "OpenAI"
-    mlmodel.license = "MIT"
-    mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
-    mlmodel.version = "2.0"
-
-    mlmodel.save(output)
+    print("Traced model", traced_model)
 
 
 if __name__ == "__main__":
