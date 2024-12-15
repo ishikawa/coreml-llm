@@ -71,8 +71,8 @@ def main(context_size: int, minimum_deployment_target: str, output: str):
 
     # convert to Core ML format
     inputs: list[ct.TensorType] = [
-        ct.TensorType(shape=input_shape, dtype=np.long, name="inputIds"),
-        ct.TensorType(shape=input_shape, dtype=np.long, name="attentionMask"),
+        ct.TensorType(shape=input_shape, dtype=np.int32, name="inputIds"),
+        ct.TensorType(shape=input_shape, dtype=np.int32, name="attentionMask"),
     ]
 
     outputs: list[ct.TensorType] = [ct.TensorType(dtype=np.float16, name="logits")]
