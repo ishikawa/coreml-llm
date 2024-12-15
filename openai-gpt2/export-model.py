@@ -1,3 +1,4 @@
+import click
 import coremltools as ct
 import numpy as np
 import torch
@@ -27,44 +28,64 @@ class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
         return out.logits
 
 
-torch_model = BaselineGPT2LMHeadModel.from_pretrained(model_id).eval()
-
-# trace the PyTorch model
-example_inputs: tuple[torch.Tensor, torch.Tensor] = (
-    torch.zeros(input_shape, dtype=torch.long),
-    torch.zeros(input_shape, dtype=torch.long),
+@click.command()
+@click.option(
+    "--context-size",
+    default=1024,
+    help="Context window size for the model.",
+    type=int,
 )
-traced_model: torch.jit.ScriptModule = torch.jit.trace(
-    torch_model,
-    example_inputs=example_inputs,
+@click.option(
+    "--output",
+    default="models/GPT2Model.mlpackage",
+    help="Output path for the Core ML model.",
+    type=click.Path(),
 )
+def main(context_size: int, output: str):
+    """Convert GPT-2 PyTorch model to Core ML format."""
+    model_id = "gpt2"
+    batch_size = 1
+    input_shape = (batch_size, context_size)
 
-# GPT2LMHeadModel
-# input_ids torch.Size([1, 11])
-# attention_mask torch.Size([1, 11])
-# convert to Core ML format
-inputs: list[ct.TensorType] = [
-    ct.TensorType(shape=input_shape, dtype=np.long, name="inputIds"),
-    ct.TensorType(shape=input_shape, dtype=np.long, name="attentionMask"),
-]
+    torch_model = BaselineGPT2LMHeadModel.from_pretrained(model_id).eval()
 
-outputs: list[ct.TensorType] = [ct.TensorType(dtype=np.float16, name="logits")]
-mlmodel: ct.models.MLModel = ct.convert(
-    traced_model,
-    inputs=inputs,
-    outputs=outputs,
-    minimum_deployment_target=ct.target.macOS13,
-    skip_model_load=True,
-)
+    # trace the PyTorch model
+    example_inputs: tuple[torch.Tensor, torch.Tensor] = (
+        torch.zeros(input_shape, dtype=torch.long),
+        torch.zeros(input_shape, dtype=torch.long),
+    )
+    traced_model: torch.jit.ScriptModule = torch.jit.trace(
+        torch_model,
+        example_inputs=example_inputs,
+    )
 
-# set metadata
-mlmodel.input_description["inputIds"] = "Input token IDs."
-mlmodel.input_description["attentionMask"] = "Attention mask."
-mlmodel.output_description["logits"] = "Logits for next token prediction."
+    # convert to Core ML format
+    inputs: list[ct.TensorType] = [
+        ct.TensorType(shape=input_shape, dtype=np.long, name="inputIds"),
+        ct.TensorType(shape=input_shape, dtype=np.long, name="attentionMask"),
+    ]
 
-mlmodel.author = "OpenAI"
-mlmodel.license = "MIT"
-mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
-mlmodel.version = "2.0"
+    outputs: list[ct.TensorType] = [ct.TensorType(dtype=np.float16, name="logits")]
+    mlmodel: ct.models.MLModel = ct.convert(
+        traced_model,
+        inputs=inputs,
+        outputs=outputs,
+        minimum_deployment_target=ct.target.macOS13,
+        skip_model_load=True,
+    )
 
-mlmodel.save("models/GPT2Model.mlpackage")
+    # set metadata
+    mlmodel.input_description["inputIds"] = "Input token IDs."
+    mlmodel.input_description["attentionMask"] = "Attention mask."
+    mlmodel.output_description["logits"] = "Logits for next token prediction."
+
+    mlmodel.author = "OpenAI"
+    mlmodel.license = "MIT"
+    mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
+    mlmodel.version = "2.0"
+
+    mlmodel.save(output)
+
+
+if __name__ == "__main__":
+    main()
