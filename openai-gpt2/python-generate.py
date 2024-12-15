@@ -50,7 +50,12 @@ class PerformanceMetricsStreamer(TextStreamer):
     default=100,
     help="The maximum number of tokens to generate.",
 )
-def main(prompt, max_length):
+@click.option(
+    "--use-cache/--no-use-cache",
+    default=True,
+    help="Whether to use KV cache during generation.",
+)
+def main(prompt, max_length, use_cache):
     tokenizer = GPT2Tokenizer.from_pretrained(
         "gpt2", clean_up_tokenization_spaces=False
     )
@@ -72,6 +77,7 @@ def main(prompt, max_length):
         max_new_tokens=max_new_tokens,
         do_sample=True,
         pad_token_id=tokenizer.eos_token_id,
+        use_cache=use_cache,
     )
 
     # Example output:
