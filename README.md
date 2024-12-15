@@ -25,7 +25,7 @@ $ make build
 
 Python
 
-```sh
+```
 poetry run python ./gpt-2/baseline/python-generate.py --max-length=100 "What is generative AI?"
 Generating text:
 What is generative AI?
@@ -39,7 +39,7 @@ Generative AI also has a "general purpose" approach where we ask if we could
 
 Swift
 
-```sh
+```
 swift run --package-path ./CoreMLRunner -- coreml-runner --max-length=106 "What is generative AI?"
 Building for debugging...
 [1/1] Write swift-version--58304C5D6DBC2206.txt
@@ -53,7 +53,7 @@ What is generative AI? Read on to learn what that means, and how it could change
 
 Python
 
-```sh
+```
 poetry run python ./inference-metrics.py --warm 3 -n 5 -- poetry run python ./openai-gpt2/python-generate.py --max-length=106 "What is generative AI?"
 ...
 
