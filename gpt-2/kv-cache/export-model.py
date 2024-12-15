@@ -167,13 +167,13 @@ class KvCacheStateGPT2LMHeadModel(torch.nn.Module):
 )
 @click.option(
     "--minimum-deployment-target",
-    default="iOS16",
+    default="iOS18",
     help="Minimum deployment target (iOS13-iOS18).",
     type=click.Choice(list(DEPLOYMENT_TARGETS.keys())),
 )
 @click.option(
     "--output",
-    default="models/GPT2Model.mlpackage",
+    default="models/gpt2-kv-cache.mlpackage",
     help="Output path for the Core ML model.",
     type=click.Path(),
 )
@@ -194,8 +194,55 @@ def main(
     traced_model: torch.jit.ScriptModule = torch.jit.trace(
         torch_model.eval(), example_inputs=example_inputs
     )
+    # print("Traced model", traced_model)
 
-    print("Traced model", traced_model)
+    # Convert to Core ML
+    query_size = ct.RangeDim(lower_bound=1, upper_bound=context_size, default=1)
+    final_step = ct.RangeDim(lower_bound=1, upper_bound=context_size, default=1)
+    inputs = [
+        ct.TensorType(shape=(batch_size, query_size), dtype=np.int32, name="inputIds"),
+        ct.TensorType(
+            shape=(batch_size, 1, query_size, final_step),
+            dtype=np.float16,
+            name="causalMask",
+        ),
+    ]
+    states = [
+        ct.StateType(
+            wrapped_type=ct.TensorType(
+                shape=torch_model.kv_cache_shape, dtype=np.float16
+            ),
+            name="keyCache",
+        ),
+        ct.StateType(
+            wrapped_type=ct.TensorType(
+                shape=torch_model.kv_cache_shape, dtype=np.float16
+            ),
+            name="valueCache",
+        ),
+    ]
+    outputs = [ct.TensorType(dtype=np.float16, name="logits")]
+
+    mlmodel = ct.convert(
+        traced_model,
+        inputs=inputs,
+        outputs=outputs,
+        states=states,
+        minimum_deployment_target=DEPLOYMENT_TARGETS[minimum_deployment_target],
+        skip_model_load=True,
+    )
+
+    # set metadata
+    mlmodel.input_description["inputIds"] = "Input token IDs."
+    mlmodel.input_description["causalMask"] = "Causal mask for the model."
+    mlmodel.output_description["logits"] = "Logits for next token prediction."
+
+    mlmodel.author = "OpenAI"
+    mlmodel.license = "MIT"
+    mlmodel.short_description = "Language Models are Unsupervised Multitask Learners"
+    mlmodel.version = "2.0"
+
+    mlmodel.save(output)
 
 
 if __name__ == "__main__":
