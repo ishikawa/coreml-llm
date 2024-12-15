@@ -1,7 +1,10 @@
+from typing import Any, Optional, Sequence
+
 import click
 import coremltools as ct
 import numpy as np
 import torch
+from transformers import Cache
 from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
 
 model_id = "gpt2"
@@ -35,6 +38,62 @@ class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
             use_cache=False,
         )
         return out.logits
+
+
+# For KV cache with Stateful model in CoreML
+# Borrowed from https://machinelearning.apple.com/research/core-ml-on-device-llama
+class SliceUpdateKeyValueCache(Cache):
+    """
+    `SliceUpdateKeyValueCache`, that extends the `Cache` class.
+
+    It essentially implements a simple update logic via the slicing operation, these op
+    patterns are then detected by the Core ML-GPU compiler and allows it to perform
+    in-place updates.
+    """
+
+    k: torch.Tensor
+    v: torch.Tensor
+    past_seen_tokens: int
+
+    def __init__(
+        self,
+        *,
+        shape: Sequence[int],
+        dtype: torch.dtype = torch.float32,
+    ) -> None:
+        """Create key/value cache of shape:
+        (#layers, batch_size, #kv_heads, context_size, head_dim)."""
+        super().__init__()
+        self.past_seen_tokens = 0
+        self.k = torch.zeros(shape, dtype=dtype)
+        self.v = torch.zeros(shape, dtype=dtype)
+
+    def update(
+        self,
+        key_states: torch.Tensor,
+        value_states: torch.Tensor,
+        layer_idx: int,
+        cache_kwargs: Optional[dict[str, Any]] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Update key / value cache tensors for slice [begin, end).
+        Return slice of key / value cache tensors from [0, end)."""
+        if cache_kwargs is None:
+            return key_states, value_states
+
+        position: torch.Tensor = cache_kwargs.get("cache_position", None)
+        assert position is not None, "cache_position required to update cache."
+
+        begin, end = self.past_seen_tokens, self.past_seen_tokens + position.shape[-1]
+        self.k[layer_idx, :, : key_states.shape[1], begin:end, :] = key_states
+        self.v[layer_idx, :, : value_states.shape[1], begin:end, :] = value_states
+        k_state = self.k[layer_idx, :, :, :end, :]
+        v_state = self.v[layer_idx, :, :, :end, :]
+
+        return k_state, v_state
+
+    def get_seq_length(self, layer_idx: Optional[int] = 0) -> int:
+        """Get the sequence length of the cache."""
+        return self.past_seen_tokens
 
 
 @click.command()
