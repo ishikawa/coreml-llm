@@ -42,8 +42,26 @@ What is generative AI? Read on to learn what that means, and how it could change
 [Extend]  => 20 tokens, throughput: 8.31 tokens/s
 ```
 
-Measure performance metrics
+## Measure performance metrics
+
+Python
 
 ```sh
-poetry run python ./inference-metrics.py -n 5 -- poetry run python ./openai-gpt2/python-generate.py --max-length=106 "What is generative AI?"
+poetry run python ./inference-metrics.py --warm 3 -n 5 -- poetry run python ./openai-gpt2/python-generate.py --max-length=106 "What is generative AI?"
+...
+
+Average Metrics:
+[Prompt]  => 6 tokens, latency (TTFT): 0.29 ms
+[Extend]  => 100 tokens, throughput: 44.93 tokens/s
+```
+
+Swift
+
+```
+poetry run python ./inference-metrics.py --warm 3 -n 5 -- swift run --package-path ./CoreMLRunner -- coreml-runner --max-length=106 "What is generative AI?"
+...
+
+Average Metrics:
+[Prompt]  => 6 tokens, latency (TTFT): 0.15 ms
+[Extend]  => 100 tokens, throughput: 9.03 tokens/s
 ```

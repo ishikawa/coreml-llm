@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 
 """
-    $ inference-metrics.py [-n 5] -- ANY PROGRAM
+指定されたプログラムを複数回実行し、推論のメトリクスを収集・集計するスクリプトです。
 
-このスクリプトは、`--` のあとに任意のプログラムを呼び出す文字列を受け取り、そのプログラムを `-n` で指定された回数（デフォルトは 5）だけ呼び出します。
+使用方法:
+    $ inference-metrics.py [-n 5] [--warm 3] -- ANY PROGRAM
+
+オプション:
+    -n          実行回数を指定（デフォルト: 5回）
+    --warm      ウォームアップの実行回数を指定（デフォルト: 3回）
+
+このスクリプトは以下のメトリクスを収集します：
+- プロンプトトークン数とFirst Token生成までの待ち時間（TTFT）
+- 生成トークン数とトークン生成のスループット（tokens/s）
+
+実行された各イテレーションのメトリクスを表示し、最後に平均値を出力します。
 """
 
 import re
@@ -80,16 +91,29 @@ def calculate_average_metrics(metrics_list: list[InferenceMetrics]) -> Inference
     )
 )
 @click.option("-n", default=5, help="Number of iterations (default: 5)")
+@click.option("--warm", default=3, help="Number of warm-up iterations (default: 3)")
 @click.argument("command", nargs=-1, type=click.UNPROCESSED)
-def main(n: int, command):
+def main(n: int, warm: int, command):
     """Run a program multiple times and measure execution time"""
     if not command:
         raise click.UsageError("No command specified after '--'")
 
+    # Warm-up phase
+    if warm > 0:
+        click.secho("\nWarming-up...", fg="yellow")
+        for i in range(warm):
+            click.secho(f"Warm-up {i + 1}/{warm}", fg="black")
+            try:
+                subprocess.run(command, check=True, text=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                raise click.ClickException(
+                    f"Command failed with exit code {e.returncode}"
+                )
+
     metrics_list = []
 
     for i in range(n):
-        click.echo(f"\nRun {i + 1}/{n}")
+        click.echo(f"Run {i + 1}/{n}")
         start_time = time.time()
         try:
             r = subprocess.run(command, check=True, text=True, capture_output=True)
