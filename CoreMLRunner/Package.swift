@@ -16,7 +16,9 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/huggingface/swift-transformers",
-            branch: "preview"),
+            //branch: "preview",
+            revision: "b964bbf8872a85332d7787777224a5f3c9a41d45"
+        ),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
     ],
     targets: [

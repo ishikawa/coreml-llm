@@ -1,6 +1,6 @@
 .PHONY: build
 
-build: models/GPT2Model.mlpackage
+build:
 	xcrun coremlcompiler compile models/gpt2-baseline.mlpackage ./CoreMLRunner/Sources/CoreMLRunner/
 	swift build --package-path ./CoreMLRunner
 #	xcrun coremlcompiler generate models/GPT2Model.mlpackage ./MyCoreMLRunner/Sources/ \
