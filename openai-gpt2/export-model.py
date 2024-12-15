@@ -10,6 +10,15 @@ batch_size = 1
 context_size = 1024
 input_shape = (batch_size, context_size)
 
+DEPLOYMENT_TARGETS = {
+    "iOS13": ct.target.iOS13,
+    "iOS14": ct.target.iOS14,
+    "iOS15": ct.target.iOS15,
+    "iOS16": ct.target.iOS16,
+    "iOS17": ct.target.iOS17,
+    "iOS18": ct.target.iOS18,
+}
+
 
 class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
     """Baseline LlamaForCausalLM model without key/value caching."""
@@ -36,12 +45,18 @@ class BaselineGPT2LMHeadModel(GPT2LMHeadModel):
     type=int,
 )
 @click.option(
+    "--minimum-deployment-target",
+    default="iOS16",
+    help="Minimum deployment target (iOS13-iOS18).",
+    type=click.Choice(list(DEPLOYMENT_TARGETS.keys())),
+)
+@click.option(
     "--output",
     default="models/GPT2Model.mlpackage",
     help="Output path for the Core ML model.",
     type=click.Path(),
 )
-def main(context_size: int, output: str):
+def main(context_size: int, minimum_deployment_target: str, output: str):
     """Convert GPT-2 PyTorch model to Core ML format."""
     model_id = "gpt2"
     batch_size = 1
@@ -70,7 +85,7 @@ def main(context_size: int, output: str):
         traced_model,
         inputs=inputs,
         outputs=outputs,
-        minimum_deployment_target=ct.target.macOS13,
+        minimum_deployment_target=DEPLOYMENT_TARGETS[minimum_deployment_target],
         skip_model_load=True,
     )
 

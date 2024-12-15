@@ -5,16 +5,22 @@ iPhone using CoreML. I’m particularly interested in taking advantage of the Ap
 (ANE) to make the models as fast and efficient as possible. I’m also experimenting with ways to
 optimize LLMs for iPhone.
 
-## Models
-
-### Llama
+## Llama
 
 ```sh
 $ poetry run python ./llama/export-model.py
 $ poetry run python ./llama/predict.py
 ```
 
-### GPT-2
+## GPT-2
+
+### Export model
+
+```sh
+$ poetry run python ./openai-gpt2/export-model.py --context-size 1024 --minimum-deployment-target iOS18
+```
+
+### Inference
 
 Python
 
